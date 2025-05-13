@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-express-app
+  labels:
+    app: otel-express-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-express-app
+  template:
+    metadata:
+      labels:
+        app: otel-express-app
+    spec:
+      containers:
+        - name: otel-express-app
+          image: assetsense/otel-express-app:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4318"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-express-app
+spec:
+  selector:
+    app: otel-express-app
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
