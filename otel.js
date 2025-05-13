@@ -1,33 +1,51 @@
 // otel.js
+const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
 const { NodeSDK } = require('@opentelemetry/sdk-node');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
-const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-http');
-const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { ConsoleLogRecordProcessor } = require('@opentelemetry/sdk-logs');
-const { LoggerProvider } = require('@opentelemetry/sdk-logs');
 
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
+const { LoggerProvider } = require('@opentelemetry/sdk-logs');
+const { SimpleLogRecordProcessor } = require('@opentelemetry/sdk-logs');
+
+// Enable diagnostic logging (optional)
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
+
+// Trace exporter
 const traceExporter = new OTLPTraceExporter({
   url: 'http://grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4318/v1/traces',
 });
 
-const metricExporter = new OTLPMetricExporter({
-  url: 'http://grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4318/v1/metrics',
-});
-
+// Log exporter
 const logExporter = new OTLPLogExporter({
   url: 'http://grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4318/v1/logs',
 });
 
+// Logging setup
 const loggerProvider = new LoggerProvider();
-loggerProvider.addLogRecordProcessor(new ConsoleLogRecordProcessor(logExporter));
-loggerProvider.forceFlush();
+loggerProvider.addLogRecordProcessor(new SimpleLogRecordProcessor(logExporter));
+loggerProvider.register();
 
+// SDK init
 const sdk = new NodeSDK({
   traceExporter,
-  metricExporter,
   instrumentations: [getNodeAutoInstrumentations()],
   loggerProvider,
 });
 
-sdk.start();
+sdk.start()
+  .then(() => {
+    console.log('OpenTelemetry tracing and logging initialized');
+  })
+  .catch((error) => {
+    console.log('Error initializing OpenTelemetry', error);
+  });
+
+process.on('SIGTERM', () => {
+  sdk.shutdown()
+    .then(() => console.log('OpenTelemetry shutdown complete'))
+    .catch((error) => console.log('OpenTelemetry shutdown error', error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = { loggerProvider };
