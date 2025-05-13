@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: otel-express-app
-          image: assetsense/otel-express-app:v1
+          image: assetsense/otel-express-app:v2
           ports:
             - containerPort: 3000
           env:

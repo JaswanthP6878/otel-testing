@@ -3,34 +3,25 @@ require('./otel');
 
 const express = require('express');
 const app = express();
-
 const { logs } = require('@opentelemetry/api-logs');
+
 const logger = logs.getLogger('express-app');
 
 app.get('/', (req, res) => {
   logger.emit({
-    body: 'Received GET / request',
+    body: 'Handling GET /',
     severityText: 'INFO',
     attributes: { route: '/', method: 'GET' },
   });
 
-  res.send('Hello from Express with tracing and logging!');
-});
-
-app.get('/error', (req, res) => {
-  logger.emit({
-    body: 'Something went wrong in /error route',
-    severityText: 'ERROR',
-    attributes: { route: '/error' },
-  });
-
-  res.status(500).send('Error occurred!');
+  res.send('Hello from OpenTelemetry + Express!');
 });
 
 app.listen(3000, () => {
   logger.emit({
-    body: 'Express server started on port 3000',
+    body: 'Server listening on port 3000',
     severityText: 'INFO',
   });
-  console.log('Server running on port 3000');
+
+  console.log('Server is running on port 3000');
 });
