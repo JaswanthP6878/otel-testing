@@ -22,4 +22,4 @@ app.get("/metrics", async (_req, res) => {
   res.send(await client.register.metrics());
 });
 
-app.listen(3000, () => console.log("Server listening on port 3000"));
+app.listen(3000,'0.0.0.0', () => console.log("Server listening on port 3000"));
