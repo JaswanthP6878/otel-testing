@@ -5,7 +5,7 @@ metadata:
   labels:
     app: otel-express-app
   annotations:
-    # k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/scrape: "true"
     k8s.grafana.com/job: "express-server"
     k8s.grafana.com/metrics.path: "/metrics"
     k8s.grafana.com/metrics.portNumber: "3000"
