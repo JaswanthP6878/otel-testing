@@ -1,27 +1,25 @@
-// server.js
-require('./otel');
+import express from "express";
+import client from "prom-client";
 
-const express = require('express');
 const app = express();
-const { logs } = require('@opentelemetry/api-logs');
+client.collectDefaultMetrics();
 
-const logger = logs.getLogger('express-app');
-
-app.get('/', (req, res) => {
-  logger.emit({
-    body: 'Handling GET /',
-    severityText: 'INFO',
-    attributes: { route: '/', method: 'GET' },
-  });
-
-  res.send('Hello from OpenTelemetry + Express!');
+const counter = new client.Counter({
+  name: "http_requests_total",
+  help: "Total HTTP requests",
+  labelNames: ["method", "path", "status"],
 });
 
-app.listen(3000, () => {
-  logger.emit({
-    body: 'Server listening on port 3000',
-    severityText: 'INFO',
+app.use((req, res, next) => {
+  res.on("finish", () => {
+    counter.inc({ method: req.method, path: req.path, status: res.statusCode });
   });
-
-  console.log('Server is running on port 3000');
+  next();
 });
+
+app.get("/metrics", async (_req, res) => {
+  res.set("Content-Type", client.register.contentType);
+  res.send(await client.register.metrics());
+});
+
+app.listen(3000, () => console.log("Server listening on port 3000"));

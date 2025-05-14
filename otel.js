@@ -10,27 +10,20 @@ const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
 const { LoggerProvider } = require('@opentelemetry/sdk-logs');
 const { SimpleLogRecordProcessor } = require('@opentelemetry/sdk-logs');
 
-// Enable optional diagnostics
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
-// Setup trace exporter
 const traceExporter = new OTLPTraceExporter({
   url: 'http://grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4318/v1/traces',
 });
 
-// Setup log exporter
 const logExporter = new OTLPLogExporter({
   url: 'http://grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4318/v1/logs',
 });
 
-// Setup logger provider
 const loggerProvider = new LoggerProvider();
 loggerProvider.addLogRecordProcessor(new SimpleLogRecordProcessor(logExporter));
 
-// ✅ Register logger provider globally
 logs.setGlobalLoggerProvider(loggerProvider);
-
-// Create and start SDK
 const sdk = new NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
