@@ -4,11 +4,6 @@ metadata:
   name: otel-express-app
   labels:
     app: otel-express-app
-  annotations:
-    k8s.grafana.com/scrape: "true"
-    k8s.grafana.com/job: "express-server"
-    k8s.grafana.com/metrics.path: "/metrics"
-    k8s.grafana.com/metrics.portNumber: "3000"
 spec:
   replicas: 4
   selector:
@@ -18,6 +13,11 @@ spec:
     metadata:
       labels:
         app: otel-express-app
+      annotations:
+        k8s.grafana.com/scrape: "true"
+        k8s.grafana.com/job: "express-server-pods"
+        k8s.grafana.com/metrics.path: "/metrics"
+        k8s.grafana.com/metrics.portNumber: "3000"
     spec:
       containers:
         - name: otel-express-app
