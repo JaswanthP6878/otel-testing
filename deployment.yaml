@@ -10,7 +10,7 @@ metadata:
     k8s.grafana.com/metrics.path: "/metrics"
     k8s.grafana.com/metrics.portNumber: "3000"
 spec:
-  replicas: 1
+  replicas: 4
   selector:
     matchLabels:
       app: otel-express-app
