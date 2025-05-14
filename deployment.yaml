@@ -5,7 +5,7 @@ metadata:
   labels:
     app: otel-express-app
 spec:
-  replicas: 4
+  replicas: 5
   selector:
     matchLabels:
       app: otel-express-app
@@ -13,11 +13,6 @@ spec:
     metadata:
       labels:
         app: otel-express-app
-      annotations:
-        k8s.grafana.com/scrape: "true"
-        k8s.grafana.com/job: "express-server-pods"
-        k8s.grafana.com/metrics.path: "/metrics"
-        k8s.grafana.com/metrics.portNumber: "3000"
     spec:
       containers:
         - name: otel-express-app
@@ -34,6 +29,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: otel-express-app
+  annotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/job: "endex-express-server"
+    k8s.grafana.com/metrics.path: "/metrics"
+    k8s.grafana.com/metrics.portNumber: "3000"
 spec:
   selector:
     app: otel-express-app
